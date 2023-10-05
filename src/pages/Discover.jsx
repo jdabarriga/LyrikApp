@@ -19,7 +19,7 @@ const Discover = () => {
   if (error) return <Error />;
   //const data = songs;
 
-  console.log(data);
+  //console.log(data);
   const genreTitle = genres.find(({ value }) => value === genreListId)?.title;
 
   return (
