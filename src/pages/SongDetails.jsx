@@ -4,7 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { DetailsHeader, Error, Loader, RelatedSongs } from '../components';
 
 import { setActiveSong, playPause } from '../redux/features/playerSlice';
-import { useGetSongDetailsQuery, useGetSongRelatedQuery } from '../redux/services/shazamCore';
+import { useGetSongDetailsQuery, useGetSongRelatedQuery } from '../redux/services/spotifyApi';
+import { useSearchSongQuery, useGetSongLyricsQuery } from '../redux/services/geniusApi';
 
 const SongDetails = () => {
   const dispatch = useDispatch();
@@ -13,6 +14,16 @@ const SongDetails = () => {
 
   const { data, isFetching: isFetchinRelatedSongs, error } = useGetSongRelatedQuery({ songid });
   const { data: songData, isFetching: isFetchingSongDetails } = useGetSongDetailsQuery({ songid });
+
+  // Search for lyrics on Genius
+  const { data: geniusSearchResult } = useSearchSongQuery(
+    { title: songData?.title, artist: songData?.subtitle },
+    { skip: !songData }
+  );
+  const { data: lyricsData } = useGetSongLyricsQuery(
+    geniusSearchResult?.id,
+    { skip: !geniusSearchResult?.id }
+  );
 
   if (isFetchingSongDetails && isFetchinRelatedSongs) return <Loader title="Searching song details" />;
 
@@ -40,13 +51,27 @@ const SongDetails = () => {
         <h2 className="text-white text-3xl font-bold">Lyrics:</h2>
 
         <div className="mt-5">
-          {songData?.sections[1].type === 'LYRICS'
-            ? songData?.sections[1]?.text.map((line, i) => (
+          {lyricsData?.sections?.[0]?.text ? (
+            lyricsData.sections[0].text.map((line, i) => (
               <p key={`lyrics-${line}-${i}`} className="text-gray-400 text-base my-1">{line}</p>
             ))
-            : (
-              <p className="text-gray-400 text-base my-1">Sorry, No lyrics found!</p>
-            )}
+          ) : lyricsData?.lyricsUrl ? (
+            <div>
+              <p className="text-gray-400 text-base my-1">
+                Lyrics are available on Genius.com
+              </p>
+              <a
+                href={lyricsData.lyricsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 underline"
+              >
+                View Lyrics on Genius →
+              </a>
+            </div>
+          ) : (
+            <p className="text-gray-400 text-base my-1">Loading lyrics...</p>
+          )}
         </div>
       </div>
 

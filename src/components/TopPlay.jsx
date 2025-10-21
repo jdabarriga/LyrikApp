@@ -7,7 +7,7 @@ import { FreeMode } from 'swiper';
 
 import PlayPause from './PlayPause';
 import { playPause, setActiveSong } from '../redux/features/playerSlice';
-import { useGetTopChartsQuery } from '../redux/services/shazamCore';
+import { useGetTopChartsQuery } from '../redux/services/spotifyApi';
 
 import 'swiper/css';
 import 'swiper/css/free-mode';
@@ -23,7 +23,7 @@ const TopChartCard = ({ song, i, isPlaying, activeSong, handlePauseClick, handle
             {song?.title}
           </p>
         </Link>
-        <Link to={`/artists/${song?.artists[0].adamid}`}>
+        <Link to={`/artists/${song?.artists?.[0]?.id}`}>
           <p className="text-base text-gray-300 mt-1">
             {song?.subtitle}
           </p>
@@ -109,8 +109,8 @@ const TopPlay = () => {
               style={{ width: '25%', height: 'auto' }}
               className="shadow-lg rounded-full animate-slideright"
             >
-              <Link to={`/artists/${artist?.artists[0].adamid}`}>
-                <img src={artist?.images?.background} alt="Name" className="rounded-full w-full object-cover" />
+              <Link to={`/artists/${artist?.artists?.[0]?.id}`}>
+                <img src={artist?.images?.coverart} alt="Name" className="rounded-full w-full object-cover" />
               </Link>
             </SwiperSlide>
           ))}
